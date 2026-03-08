@@ -1,0 +1,29 @@
+import platform
+import uuid
+import shutil
+import hashlib
+import os
+
+
+def get_cpu():
+    return platform.processor().strip()
+
+
+def get_mac():
+    mac = uuid.getnode()
+    return ":".join(f"{(mac >> ele) & 0xff:02x}" for ele in range(40, -1, -8))
+
+
+def get_disk_size():
+    path = "C:\\" if os.name == "nt" else "/"
+    return str(shutil.disk_usage(path).total)
+
+
+def create_fingerprint():
+    raw = get_cpu() + get_mac() + get_disk_size()
+    print("Raw info:", raw)
+    return hashlib.sha256(raw.encode()).hexdigest()
+
+
+fingerprint = create_fingerprint()
+print("System fingerprint:", fingerprint)
