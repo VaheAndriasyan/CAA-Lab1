@@ -1,20 +1,90 @@
-import platform
-import uuid
-import shutil
-import hashlib
 import os
 
 
-info = {
-    "cpu": platform.processor().strip(),
-    "mac": ":".join(f"{uuid.getnode():012x}[i:i+2]" for i in range(0, 12, 2)),
-    "disk": str(shutil.disk_usage("C:\\" if os.name == "nt" else "/").total)
-}
+def rle_encode(data):
+    if len(data) == 0:
+        return ""
 
-raw = "".join(info.values())
+    result = []
+    current = data[0]
+    counter = 1
 
-print("Raw info:", raw)
+    for symbol in data[1:]:
+        if symbol == current:
+            counter += 1
+        else:
+            result.append(str(counter) + current)
+            current = symbol
+            counter = 1
 
-fingerprint = hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    result.append(str(counter) + current)
+    return "".join(result)
 
-print("System fingerprint:", fingerprint)
+
+def rle_decode(data):
+    output = []
+    number = ""
+
+    for symbol in data:
+        if symbol.isdigit():
+            number += symbol
+        else:
+            if number:
+                output.append(symbol * int(number))
+                number = ""
+            else:
+                output.append(symbol)
+
+    return "".join(output)
+
+
+def process_file(filename, mode):
+    with open(filename, "r", encoding="utf-8") as file:
+        content = file.read()
+
+    if mode == "encode":
+        new_content = rle_encode(content)
+        action = "Compressed"
+    else:
+        new_content = rle_decode(content)
+        action = "Decoded"
+
+    with open(filename, "w", encoding="utf-8") as file:
+        file.write(new_content)
+
+    print(f"Original: {len(content)} symbols")
+    print(f"{action}: {len(new_content)} symbols")
+    print(f"File '{filename}' updated.")
+
+
+def menu():
+    while True:
+        print("\n--- RLE Menu ---")
+        print("1 - Encode file")
+        print("2 - Decode file")
+        print("0 - Exit")
+
+        option = input("Select option: ").strip()
+
+        if option == "0":
+            print("Exit program.")
+            break
+
+        if option not in ("1", "2"):
+            print("Invalid choice.")
+            continue
+
+        name = input("Enter file name: ").strip()
+
+        if not os.path.isfile(name):
+            print("File not found.")
+            continue
+
+        if option == "1":
+            process_file(name, "encode")
+        else:
+            process_file(name, "decode")
+
+
+if __name__ == "__main__":
+    menu()
