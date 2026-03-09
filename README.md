@@ -8,5 +8,5 @@
 
 ---
 
-## 4. System Fingerprint Hash (Advanced Task)
+## System Fingerprint Hash (Advanced Task)
 **SHA256 Hash:** `c6136b91ef7574924835e5b09a943cd96c375b7d6b2b8e2c5a9081bd3b2fcd54`
